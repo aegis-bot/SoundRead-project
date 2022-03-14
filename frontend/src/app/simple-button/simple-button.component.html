@@ -1,0 +1,16 @@
+<input type="file" class="file-input"
+       (change)="onFileSelected($event)" #fileUpload>
+
+<div class="file-upload">
+
+   {{fileName || "No file uploaded yet."}}
+
+    <button mat-mini-fab color="primary" class="upload-btn"
+      (click)="fileUpload.click()">
+        <h4>attach_file</h4>
+    </button>
+</div>
+       
+<button (click) = "sendFilesForTranscribing()">
+    {{displayText}}
+</button>
