@@ -1,5 +1,5 @@
-# CS4347-Music-Project-Team8
-Melody and Lyrics Transcription System
+# SoundRead Project
+SoundRead is a melody and lyrics transcription web service that takes advantage of the modern ML to churn out accurate lyrics.
 This program uses a web application frontend (Using Angular) and a backend server using FastAPI. To get started, you need to run both the frontend and the backend.
 ## Frontend
 - Make sure you have angular installed. To install in the Terminal, run ``npm install - g @angular/cli``.
