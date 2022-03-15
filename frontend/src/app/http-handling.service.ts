@@ -27,9 +27,10 @@ export class HttpHandlingService {
   
 
   sendFiles(file: File) {
+    console.log("sendfiles")
     const formData = new FormData();
     formData.append("fileObject", file);
-    const upload$ = this.http.post(this.mainUrl + "upload/", formData);
+    const upload$ = this.http.post("http://127.0.0.1:8000/upload/", formData);
     upload$.subscribe(data=> {
       console.log(data);
     });
