@@ -11,7 +11,7 @@ app = FastAPI()
 origins = [
     "http://localhost:4200",
     "http://localhost",
-    "http://localhost:8000",
+    "http://localhost:8000"
 ]
 
 app.add_middleware(
@@ -41,15 +41,12 @@ async def getDataset(message: str):
     return {"backendMessage" : data}    
 
 
-
-
 #send files
 @app.post("/upload/")
 async def uploadFile(fileObject:UploadFile = File(...)):
     print("frontend is uploading file!")
-    
-    contents = await fileObject.read();
-    #save_file(FileObject.filename, contents)
+    contents = await fileObject.read()
+    save_file(fileObject.filename, contents)
     return {"uploaded file: " : fileObject.filename}
 
     
