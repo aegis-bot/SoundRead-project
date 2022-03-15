@@ -54,13 +54,11 @@ class LyricDataset(torch.utils.data.Dataset):
         inds = random.choices([i for i in range(self.__len__())], k=n)
         return [self.__getitem__(i) for i in inds]
 
-    def collate_batch(self, batch: List[Tuple[torch.Tensor, str]]) -> Tuple[BatchEncoding, BatchEncoding]:
+    def collate_batch(self, batch: List[Tuple[torch.Tensor, str]]) -> Tuple[BatchEncoding, BatchEncoding, List[str]]:
         features, texts = tuple(zip(*batch))
         features = self.processor(
             features,
-            # max_length=self.max_length,
             padding=True,
-            # truncation=True,
             return_tensors="pt",
             sampling_rate=self.sample_rate,
         )
@@ -70,5 +68,5 @@ class LyricDataset(torch.utils.data.Dataset):
                 padding=True,
                 return_tensors="pt"
             )
-            labels.input_ids.masked_fill_(~labels.attention_mask.bool(), -100)
-        return features, labels
+            # labels.input_ids.masked_fill_(~labels.attention_mask.bool(), -100)
+        return features, labels, texts

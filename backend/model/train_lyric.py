@@ -3,6 +3,7 @@ import os
 import time
 from tqdm import tqdm
 
+from datasets import load_metric
 import torch
 from torch import nn, optim
 from torch.cuda import amp
@@ -11,7 +12,8 @@ from transformers import Speech2TextProcessor, Speech2TextForConditionalGenerati
 
 from lyric_data import LyricDataset
 
-MODEL_NAME = "facebook/s2t-small-librispeech-asr"
+MODEL_NAME = "facebook/s2t-medium-librispeech-asr"
+# MODEL_NAME = "facebook/wav2vec2-base-960h"
 
 DEVICE = torch.device("cuda") if torch.cuda.is_available() else torch.device("cpu")
 ENABLE_PROGRESS = True
@@ -19,12 +21,13 @@ ENABLE_PROGRESS = True
 MAX_SECS = 12
 
 LR = 5e-5
-N_EPOCHS = 10
+N_EPOCHS = 50
 SAVE_DIR = "save/"
+LOAD = None  # "save/wav2vec2-base-960h_2203140107_106.pt"
 
-TRAIN_BATCH_SIZE = 24
+TRAIN_BATCH_SIZE = 12
 TRAIN_SPLIT = .9
-VALID_BATCH_SIZE = 48
+VALID_BATCH_SIZE = 24
 
 
 def train_lyric(
@@ -36,6 +39,7 @@ def train_lyric(
         max_secs: float = MAX_SECS,
         n_epochs: int = N_EPOCHS,
         save_dir: str = SAVE_DIR,
+        load: str = LOAD,
         train_batch_size: int = TRAIN_BATCH_SIZE,
         train_split: float = TRAIN_SPLIT,
         valid_batch_size: int = VALID_BATCH_SIZE
@@ -46,8 +50,10 @@ def train_lyric(
         model.config.ctc_zero_infinity = True
         model.config.ctc_loss_reduction = "mean"
     else:
-        processor = Speech2TextProcessor.from_pretrained(model_name)
+        processor = Speech2TextProcessor.from_pretrained(model_name, do_upper_case=True)
         model = Speech2TextForConditionalGeneration.from_pretrained(model_name).to(device)
+    if load:
+        model.load_state_dict(torch.load(load))
 
     dataset = LyricDataset(path, processor, max_secs=max_secs)
     n_train = int(len(dataset) * train_split) if train_split < 1. else len(dataset)
@@ -68,18 +74,22 @@ def train_lyric(
         batch_size=valid_batch_size,
         collate_fn=dataset.collate_batch,
         pin_memory=True,
+        shuffle=True,
     ) if valid_dataset else None
 
     optimizer = optim.AdamW(model.parameters(), lr=lr)
     scaler = amp.GradScaler()
     train_losses = []
+    train_wers = []
     valid_losses = []
+    valid_wers = []
+    wer = load_metric("wer")
     best_valid_loss = torch.inf
     best_fn = None
 
     for epoch in (epoch_iterator := tqdm(range(n_epochs), disable=not enable_progress)):
         model.train()
-        for features, labels in (train_iterator := tqdm(train_loader, disable=not enable_progress, leave=False)):
+        for features, labels, texts in (train_iterator := tqdm(train_loader, disable=not enable_progress, leave=False)):
             for key in features:
                 features[key] = features[key].to(device)
             for key in labels:
@@ -87,28 +97,42 @@ def train_lyric(
 
             optimizer.zero_grad()
             with amp.autocast():
-                loss = model(**features, labels=labels.input_ids).loss
+                out = model(**features, labels=labels.input_ids)
+            _, preds = out.logits.max(-1)
+            preds = dataset.processor.batch_decode(preds, skip_special_tokens=True)
+            loss = out.loss
             scaler.scale(loss).backward()
             scaler.step(optimizer)
             scaler.update()
 
             train_losses.append(loss.item())
-            train_iterator.set_postfix_str("batch_mean_loss: {:.2f}".format(train_losses[-1]))
+            train_wers.append(wer.compute(predictions=preds, references=texts))
+            train_iterator.set_postfix_str(
+                "batch_mean_loss:{:.2f}  batch_wer:{:.2f}".format(train_losses[-1], train_wers[-1])
+            )
 
+        examples = None
         if valid_loader:
             with torch.inference_mode():
                 model.eval()
-                for features, labels in valid_loader:
+                for features, labels, texts in valid_loader:
                     for key in features:
                         features[key] = features[key].to(device)
                     for key in labels:
                         labels[key] = labels[key].to(device)
                     with amp.autocast():
-                        loss = model(**features, labels=labels.input_ids).loss
+                        out = model(**features, labels=labels.input_ids)
+                    _, preds = out.logits.max(-1)
+                    preds = dataset.processor.batch_decode(preds, skip_special_tokens=True)
+                    loss = out.loss
                     valid_losses.append(loss.item())
+                    valid_wers.append(wer.compute(predictions=preds, references=texts))
+                examples = list(zip(preds, texts))[:3]
 
         train_loss = sum(train_losses) / len(train_losses)
+        train_wer = sum(train_wers) / len(train_wers)
         valid_loss = sum(valid_losses) / len(valid_losses)
+        valid_wer = sum(valid_wers) / len(valid_wers)
         if valid_loss < best_valid_loss:
             prev_best_fn = best_fn
             ts = time.strftime("%y%m%d%H%M")
@@ -120,7 +144,11 @@ def train_lyric(
                 except OSError:
                     pass
             best_valid_loss = valid_loss
-        info = "epoch {}: train_loss:{:.2f} valid_loss:{:.2f}".format(epoch, train_loss, valid_loss)
+        info = '='*120 + "\nepoch {}: train_loss:{:.2f} train_wer:{:.2f} | valid_loss:{:.2f} valid_wer:{:.2f}".format(
+            epoch, train_loss, train_wer, valid_loss, valid_wer)
+        if examples:
+            for pred, text in examples:
+                info += f"\npred: {pred}\ntext: {text}"
         epoch_iterator.write(info)
 
 
