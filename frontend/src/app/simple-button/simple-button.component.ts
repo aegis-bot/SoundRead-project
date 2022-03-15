@@ -26,7 +26,6 @@ export class SimpleButtonComponent implements OnInit {
     }
   }
 
-
   sendFilesForTranscribing() {
     console.log("sendFilesForTranscribing");
     let input = "I'm screwed"
