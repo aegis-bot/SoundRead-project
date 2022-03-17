@@ -8,11 +8,15 @@ import { catchError, retry } from 'rxjs/operators';
 import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
 import { SimpleButtonComponent } from './simple-button/simple-button.component';
+import { CardComponentComponent } from './card-component/card-component.component';
+
+
 
 @NgModule({
   declarations: [
     AppComponent,
-    SimpleButtonComponent
+    SimpleButtonComponent,
+    CardComponentComponent
   ],
   imports: [
     BrowserModule,
