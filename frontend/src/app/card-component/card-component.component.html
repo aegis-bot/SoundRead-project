@@ -1,10 +1,25 @@
-<div class="row justify-content-md-center">
-    <div class= "col-4">
+<input type="file" class="file-input"
+(change)="onFileSelected($event)" #fileUpload>
+
+<div class="justify-content-md-center">
+    <div class= "col">
       <div class="card">
-        <h5 class="card-title text-center">Music recording</h5>
-        
-        <div style="padding: 20px;">
-          <app-simple-button></app-simple-button>        
+        <div class= "card-title text-center">
+          {{header}}
+        </div>
+        <div class = "card-image text-center">
+          <ng-content></ng-content>
+        </div>
+        <div class="card-body text-center">
+          {{fileName}}
+        </div>
+
+        <div>
+          <div class = "text-center">
+            <app-simple-button 
+              [displayText]="buttonDesc" (click)="fileUpload.click()">
+            </app-simple-button>
+          </div>
         </div>
       </div>
     </div>
