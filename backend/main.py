@@ -47,6 +47,7 @@ async def uploadFile(fileObject:UploadFile = File(...)):
     print("frontend is uploading file!")
     contents = await fileObject.read()
     save_file(fileObject.filename, contents)
+    # insert code here to make request to prediction services
     return {"uploaded file: " : fileObject.filename}
 
     
