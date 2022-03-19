@@ -13,21 +13,45 @@
 <div class="container">
   <div class="row">
     <div class="text-center h5" style="padding-top: 2rem; padding-bottom: 2rem;">
-      To get started, please upload your recordings to see transcribed lyrics!
+      <div *ngIf="!file">
+        To get started, <br>please upload your recordings to see transcribed lyrics!
+      </div>
     </div>
   </div>
-
-  <app-card-component>
-  </app-card-component>
-
-  <!-- app components collect files. from card. transcribe will send these files to the backend for transcription-->
-  <!-- resultsComponent will subscribe to the results-->
 
   <div class="row">
-    <div class="text-center h5" style="padding-top: 2rem; padding-bottom: 2rem;">
-      Your results are shown below!
+    <div class="col">
+      <app-card-component [buttonDesc]="'Upload mp3'" (receivedFileEvent)="changeUploadedFile($event)">
+        <i class="fa-solid fa-file-audio fa-5x"></i>
+      </app-card-component>
+    
+      <div class="row">
+        <div class="text-center h5" style="padding-top: 2rem; padding-bottom: 2rem;">
+            <app-simple-button id="sendBtn" 
+            [displayText]="resultFile?'Try Again!':'Transcribe!'" 
+            buttonClass="btn btn-primary btn-xl"
+            [isEnabled]="file?true:false"
+            (click)="sendFilesForTranscribing()">
+            </app-simple-button>
+        </div>
+      </div>
     </div>
+  
+    <!--*ngIf="resultFile?true:false"-->
+    <div class="col-8" *ngIf="resultFile?true:false">
+      <app-result-table>
+        
+      </app-result-table>
+      
+    </div>
+
   </div>
+
+
+
+  
+
+
 
 </div>
 

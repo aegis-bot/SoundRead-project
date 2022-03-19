@@ -9,6 +9,7 @@ import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
 import { SimpleButtonComponent } from './simple-button/simple-button.component';
 import { CardComponentComponent } from './card-component/card-component.component';
+import { ResultTableComponent } from './result-table/result-table.component';
 
 
 
@@ -16,7 +17,8 @@ import { CardComponentComponent } from './card-component/card-component.componen
   declarations: [
     AppComponent,
     SimpleButtonComponent,
-    CardComponentComponent
+    CardComponentComponent,
+    ResultTableComponent
   ],
   imports: [
     BrowserModule,
