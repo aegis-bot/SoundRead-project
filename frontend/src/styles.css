@@ -6232,8 +6232,8 @@ textarea.form-control-lg {
 }
 .spinner-border {
   display: inline-block;
-  width: 2rem;
-  height: 2rem;
+  width: 5rem;
+  height: 5rem;
   vertical-align: -0.125em;
   border: 0.25em solid currentColor;
   border-right-color: transparent;

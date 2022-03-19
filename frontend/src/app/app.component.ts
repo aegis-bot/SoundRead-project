@@ -14,6 +14,7 @@ export class AppComponent {
   public resultFile: File;
   public result: any;
 
+  public sent: boolean = false;
   
   constructor(private dataService: HttpHandlingService){  }
   changeUploadedFile(file:File) {
@@ -40,6 +41,7 @@ export class AppComponent {
     //this.dataService.sendFiles(this.file);
     //REMOVE THIS ONCE BACKEND IS COMPLETED
     this.resultFile = this.file;
+    this.sent = true;
   }
 }
 

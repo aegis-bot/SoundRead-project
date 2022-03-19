@@ -15,8 +15,8 @@
         </div>
 
         <div>
-          <div class = "text-center">
-            <app-simple-button 
+          <div *ngIf="buttonDesc" class="text-center">
+            <app-simple-button id="uploadButton"
               [displayText]="buttonDesc" (click)="fileUpload.click()">
             </app-simple-button>
           </div>

@@ -19,8 +19,8 @@
     </div>
   </div>
 
-  <div class="row">
-    <div class="col">
+  <div class="row justify-content-md-center ">
+    <div class="col-4 ">
       <app-card-component [buttonDesc]="'Upload mp3'" (receivedFileEvent)="changeUploadedFile($event)">
         <i class="fa-solid fa-file-audio fa-5x"></i>
       </app-card-component>
@@ -37,13 +37,27 @@
       </div>
     </div>
   
-    <!--*ngIf="resultFile?true:false"-->
-    <div class="col-8" *ngIf="resultFile?true:false">
-      <app-result-table>
-        
-      </app-result-table>
-      
+    <!--
+    <div class="spinner-border text-success" role="status">
+      <span class="sr-only">Loading...</span>
     </div>
+  -->
+    <div *ngIf="sent" class="col-8 justify-content-md-center"> 
+      <div *ngIf="!resultFile; else loadingResults">
+        <app-result-table [file] = "resultFile">
+        </app-result-table>
+      </div>
+      <ng-template #loadingResults>
+        <app-card-component>
+          <div class="spinner-border text-success" role="status">
+            <span class="sr-only">Loading...</span>
+          </div>
+        </app-card-component>
+      </ng-template>
+      
+
+    </div>
+
 
   </div>
 

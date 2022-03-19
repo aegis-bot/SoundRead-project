@@ -12,8 +12,8 @@ import { HttpHandlingService } from '../http-handling.service';
 })
 export class CardComponentComponent implements OnInit {
   //no parameters unless got multiple uploads
-  @Input() header = "";
-  @Input() buttonDesc  = "";
+  @Input() header:string;
+  @Input() buttonDesc:string;
   public  fileName: any;
   private file: File;
 
