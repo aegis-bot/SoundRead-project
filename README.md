@@ -14,14 +14,18 @@ This program uses a web application frontend (Using Angular) and a backend serve
 
 - Activate your virtual environment.
 
-- Navigate to the `backend` folder
-
 - In virtual environment `(venv)`, install dependencies with: `pip install -r requirements.txt`
 
+- proceed to dowload the [lyric transcription model]() and [melody transciption model]()
+
+- Create a model folder and put it in the backend folder.
+
+- Place the models downloaded into the path 'backend/model'
+
 ## Run python backend server
+- Navigate to the `backend` folder
 
-- In virtual environment `(venv)`, to run python backend server: `uvicorn main:app --reload`
+- In virtual environment `(venv)`, to run python backend server: `python3 main.py`
 
-Server runs by default at http://localhost:8000
+Server runs by default at http://127.0.0.1:5000/
 
-Documentation for api will also be available at http://localhost:8000/docs#/
