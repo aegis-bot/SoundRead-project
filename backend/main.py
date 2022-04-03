@@ -1,58 +1,65 @@
-from email.mime import multipart
-from enum import Enum
-from importlib.resources import contents
-from fastapi.middleware.cors import CORSMiddleware
+from flask import Flask, request, jsonify
+import torch
+import os
+import predictor
+from transformers import Speech2TextProcessor, Speech2TextForConditionalGeneration
+from melody.predictor import EffNetPredictor
 
-from fastapi import FastAPI, File, Form, UploadFile
+app = Flask(__name__)
 
-#create a FastAPI instance
-app = FastAPI()
-
-origins = [
-    "http://localhost:4200",
-    "http://localhost",
-    "http://localhost:8000"
-]
-
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=origins,
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
-
-class TestData(str, Enum):
-    packetName = "packetName"
-    video = "video"
-    audio = "audio"
-    imuData = "imuData"
+file_type_allowed = ['mp3', 'wav']
 
 
-
-@app.get("/")
-async def root():
-    return {"message": "Hello World"}
-
-@app.get("/simpleMessage/")
-async def getDataset(message: str):
-    data = "backend replies you!"
-    print(message)
-    return {"backendMessage" : data}    
+def allowed_file(filename):
+    return '.' in filename and filename.rsplit('.', 1)[1].lower() in file_type_allowed
 
 
-#send files
-@app.post("/upload/")
-async def uploadFile(fileObject:UploadFile = File(...)):
-    print("frontend is uploading file!")
-    contents = await fileObject.read()
-    save_file(fileObject.filename, contents)
-    # insert code here to make request to prediction services
-    return {"uploaded file: " : fileObject.filename}
+@app.route('/upload', methods=['POST'])
+def upload_file():
+    if request.method == 'POST':
 
-    
+        if request.files['file'].filename == '':
+            resp = jsonify({"response": "No file input in the request"})
+            resp.status_code = 400
+            return resp
 
-def save_file(filename, data):
-    with open(filename, 'wb') as f:
-        f.write(data)
-    
+        file = request.files['file']
+
+        if not allowed_file(file.filename):
+            resp = jsonify({"response": "File type not allowed"})
+            return resp
+
+        temp_path = os.path.join(os.getcwd(), file.filename)
+        file.save(temp_path)
+
+        # lyric prediction
+        lyric_preds = predictor.predict_lyrics(temp_path, model, processor, device)
+
+        # melody prediction
+        song_id = '1'
+        results = {}
+
+        melody_preds = predictor.predict_song(my_melody_predictor, temp_path, song_id, results, do_svs=False,
+                                                onset_thres=0.4, offset_thres=0.5)
+
+        os.remove(temp_path)
+
+        resp = jsonify({"lyrics": lyric_preds,
+                        "melody": melody_preds})
+        return resp
+
+
+if __name__ == "__main__":
+    # load lyric
+    pretrained = "facebook/s2t-medium-librispeech-asr"
+    lyric_model_path = "model/lyric_model.pt"
+    device = torch.device("cuda") if torch.cuda.is_available() else torch.device("cpu")
+    processor = Speech2TextProcessor.from_pretrained(pretrained, do_upper_case=True)
+    model = Speech2TextForConditionalGeneration.from_pretrained(pretrained).to(device)
+    model.load_state_dict(torch.load(lyric_model_path, map_location=torch.device('cpu')))
+
+    # load melody
+    melody_model_path = "model/melody_model"
+    my_melody_predictor = EffNetPredictor(device=device, model_path=melody_model_path)
+
+    app.run(debug=True)

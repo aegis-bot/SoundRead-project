@@ -2,7 +2,6 @@ import os
 import random
 from typing import List, Tuple, Union
 
-import numpy as np
 import torch
 import torchaudio
 from transformers import BatchEncoding, Speech2TextProcessor, Wav2Vec2Processor
