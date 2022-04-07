@@ -37,14 +37,12 @@
       </div>
     </div>
   
-    <!--
-    <div class="spinner-border text-success" role="status">
-      <span class="sr-only">Loading...</span>
-    </div>
-  -->
+
     <div *ngIf="sent" class="col-8 justify-content-md-center"> 
-      <div *ngIf="!resultFile; else loadingResults">
-        <app-result-table [file] = "resultFile">
+      <div *ngIf="predictedLyrics; else loadingResults">
+        <app-result-table 
+        [file] = "resultFile" 
+        [predictedLyrics]="predictedLyrics">
         </app-result-table>
       </div>
       <ng-template #loadingResults>

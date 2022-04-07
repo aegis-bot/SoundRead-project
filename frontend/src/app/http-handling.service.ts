@@ -1,7 +1,12 @@
 import { Injectable } from '@angular/core';
-import { HttpClient, HttpParams } from '@angular/common/http';
+import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
 import { Observable, throwError } from 'rxjs';
-import { catchError, retry } from 'rxjs/operators';
+import { catchError, map, retry } from 'rxjs/operators';
+
+export interface Resp { 
+  lyrics: string;
+  melody: any;
+}
 
 @Injectable({
   providedIn: 'root'
@@ -24,16 +29,56 @@ export class HttpHandlingService {
 
   }
 
+  async promisePostResponse(url: string, formData: FormData): Promise<Resp>{
+    return new Promise((resolve, reject) => {
+      try {
+        let responseData: Resp;
+
+        const httpOptions = {
+          headers: new HttpHeaders({
+            lyrics:  'lyrics',
+            melody: 'melody'
+          })
+        };
+      
+        let upload$ = this.http.post<Resp>(url, formData, httpOptions).subscribe(
+          (data) => {
+            console.log(data);
+            resolve(data);
+          }
+        );
+      
+      } catch (Error) {
+          reject("Bad HTTP response");
+      }
+    }
+    );
+  }
+
+  async receivePostResponse(url: string, formData: FormData, respData: Resp) : Promise<Resp> {
+    respData = await this.promisePostResponse(url, formData);
+    return respData;
+  }
+
   
 
-  sendFiles(file: File) {
+  async sendFiles(file: File): Promise<Resp> {
     console.log("sendfiles")
     const formData = new FormData();
     formData.append("fileObject", file);
-    const upload$ = this.http.post("http://127.0.0.1:8000/upload/", formData);
-    upload$.subscribe(data=> {
-      console.log(data);
+    const url = "http://127.0.0.1:8000/upload/";
+    let respData = await this.promisePostResponse(url, formData);
+    return respData;
+    /*
+    let upload$ = this.http.post<Resp>("http://127.0.0.1:8000/upload/", formData).subscribe((data : Resp)=> {
+      respData = {
+        lyrics: data.lyrics,
+        melody: data.melody
+      };
     });
+    */
+    //let test$ = this.http.get<Resp>("dasdas")
+    
   }
   
   // http get methods takes in 2 parameters:
