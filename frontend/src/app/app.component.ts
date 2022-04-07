@@ -1,5 +1,6 @@
 import { Component } from '@angular/core';
-import { HttpHandlingService } from './http-handling.service';
+import { Observable } from 'rxjs';
+import { HttpHandlingService, Resp } from './http-handling.service';
 
 @Component({
   selector: 'app-root',
@@ -12,7 +13,7 @@ export class AppComponent {
   public file: File;
 
   public resultFile: File;
-  public result: any;
+  public predictedLyrics: string;
 
   public sent: boolean = false;
   
@@ -36,9 +37,14 @@ export class AppComponent {
   }
 
 
-  sendFilesForTranscribing() {
-    //console.log("sendFilesForTranscribing");
-    //this.dataService.sendFiles(this.file);
+  async sendFilesForTranscribing() {
+    let httpResponse: Resp;
+    httpResponse = await this.dataService.sendFiles(this.file);
+    console.log(httpResponse);
+    
+    this.predictedLyrics = httpResponse.lyrics;
+    
+    
     //REMOVE THIS ONCE BACKEND IS COMPLETED
     this.resultFile = this.file;
     this.sent = true;

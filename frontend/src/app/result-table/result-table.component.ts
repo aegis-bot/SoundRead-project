@@ -7,6 +7,7 @@ import { Component, Input, OnInit } from '@angular/core';
 })
 export class ResultTableComponent implements OnInit {
   @Input() file: File;
+  @Input() predictedLyrics: string = "No lyrics found.";
   constructor() { }
 
   ngOnInit(): void {
