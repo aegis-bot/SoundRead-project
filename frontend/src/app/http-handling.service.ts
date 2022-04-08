@@ -41,7 +41,7 @@ export class HttpHandlingService {
           })
         };
       
-        let upload$ = this.http.post<Resp>(url, formData, httpOptions).subscribe(
+        let upload$ = this.http.post<Resp>(url, formData).subscribe(
           (data) => {
             console.log(data);
             resolve(data);
@@ -60,14 +60,14 @@ export class HttpHandlingService {
     return respData;
   }
 
-  
-
   async sendFiles(file: File): Promise<Resp> {
     console.log("sendfiles")
     const formData = new FormData();
     formData.append("fileObject", file);
     const url = "http://127.0.0.1:8000/upload/";
     let respData = await this.promisePostResponse(url, formData);
+    console.log("melody");
+    console.log(respData.melody);
     return respData;
     /*
     let upload$ = this.http.post<Resp>("http://127.0.0.1:8000/upload/", formData).subscribe((data : Resp)=> {
