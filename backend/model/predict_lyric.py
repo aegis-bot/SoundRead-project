@@ -14,7 +14,7 @@ if __name__ == '__main__':
     # load model
     pretrained = "facebook/s2t-medium-librispeech-asr"
     save = "lyric_model.pt"
-    device = torch.device("cuda") if torch.cuda.is_available() else torch.device("cpu")
+    device = "cpu" #torch.device("cuda") if torch.cuda.is_available() else torch.device("cpu")
     processor = Speech2TextProcessor.from_pretrained(pretrained, do_upper_case=True)
     model = Speech2TextForConditionalGeneration.from_pretrained(pretrained).to(device)
     model.load_state_dict(torch.load(save))
