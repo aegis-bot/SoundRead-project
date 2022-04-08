@@ -18,12 +18,12 @@ def allowed_file(filename):
 def upload_file():
     if request.method == 'POST':
 
-        if request.files['file'].filename == '':
+        if request.files['fileObject'].filename == '':
             resp = jsonify({"response": "No file input in the request"})
             resp.status_code = 400
             return resp
 
-        file = request.files['file']
+        file = request.files['fileObject']
 
         if not allowed_file(file.filename):
             resp = jsonify({"response": "File type not allowed"})
@@ -46,6 +46,7 @@ def upload_file():
 
         resp = jsonify({"lyrics": lyric_preds,
                         "melody": melody_preds})
+        resp.headers.add('Access-Control-Allow-Origin', '*')
         return resp
 
 
