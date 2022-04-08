@@ -16,7 +16,9 @@ This program uses a web application frontend (Using Angular) and a backend serve
 
 - In virtual environment `(venv)`, install dependencies with: `pip install -r requirements.txt`
 
-- proceed to dowload the [lyric transcription model]() and [melody transciption model]()
+- Make sure that ffmpeg is downloaded (scroll to the last section for the download process)
+
+- proceed to download the [lyric transcription model]() and [melody transciption model]()
 
 - Create a model folder and put it in the backend folder.
 
@@ -29,3 +31,15 @@ This program uses a web application frontend (Using Angular) and a backend serve
 
 Server runs by default at http://127.0.0.1:5000/
 
+## Download ffmpeg
+If you are using Anaconda, install *ffmpeg* by calling
+```
+conda install -c conda-forge ffmpeg
+```
+
+If you are not using Anaconda:
+
+* Linux (apt-get): `apt-get install ffmpeg`
+* Linux (yum): `yum install ffmpeg`
+* Mac: `brew install ffmpeg`
+* Windows: download ffmpeg binaries from this [website](https://www.gyan.dev/ffmpeg/builds/)
