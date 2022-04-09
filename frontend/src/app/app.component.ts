@@ -43,8 +43,10 @@ export class AppComponent {
   async sendFilesForTranscribing() {
     this.sent = true;
     let httpResponse: Resp;
+    this.predictedLyrics = null;
+    this.predictedMelody = null;
+
     httpResponse = await this.dataService.sendFiles(this.file);
-    console.log(httpResponse);
 
     this.predictedLyrics = httpResponse.lyrics;
     this.predictedMelody = httpResponse.melody;
