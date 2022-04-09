@@ -46,9 +46,6 @@ export class HttpHandlingService {
     formData.append("fileObject", file);
     const url = this.mainUrl + "upload";
     let respData = await this.promisePostResponse(url, formData);
-    
-    
-
 
     return respData;
   }
