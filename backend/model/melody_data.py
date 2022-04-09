@@ -2,15 +2,15 @@ import json
 import os
 import pickle
 import random
-from typing import Dict, List, Tuple, Union
+from typing import List, Tuple
 
 import librosa
+import mido
 import numpy as np
 from tqdm import tqdm
 
 import torch
-import torchaudio
-from transformers import BatchEncoding, Wav2Vec2Processor
+from transformers import BatchEncoding, Wav2Vec2Processor, Wav2Vec2ForAudioFrameClassification
 
 
 class MelodyDataset(torch.utils.data.Dataset):
@@ -33,8 +33,8 @@ class MelodyDataset(torch.utils.data.Dataset):
 
         with open(os.path.join(path, "MIR-ST500_corrected.json")) as f:
             labels = json.load(f)
-        self.min_note = int(min(note for track in labels.values() for _, _, note in track))
-        self.max_note = int(max(note for track in labels.values() for _, _, note in track))
+        self.min_note = int(min(note for track in labels.values() for _, _, note in track))  # 29
+        self.max_note = int(max(note for track in labels.values() for _, _, note in track))  # 83
         self.n_classes = self.max_note - self.min_note + 2
         exist_fns = [dn for dn in os.listdir(path) if os.path.isdir(os.path.join(path, dn))]
         self.labels = {fn: label for fn, label in labels.items() if fn in exist_fns}
@@ -119,6 +119,68 @@ class MelodyDataset(torch.utils.data.Dataset):
         else:
             sample_inds = [i for i in range(len(train_labels))]
         return [train_samples[i] for i in sample_inds], [train_labels[i] for i in sample_inds]
+
+
+def transcribe_file(
+        processor: Wav2Vec2Processor,
+        model: Wav2Vec2ForAudioFrameClassification,
+        path: str,
+        note_offset: int = 28,
+        label_sample_rate: int = 50
+):
+    device = torch.device("cuda") if torch.cuda.is_available() else torch.device("cpu")
+    model = model.to(device)
+
+    rec, _ = librosa.load(path, sr=16_000)
+    pieces = []
+    notes = []
+    with torch.inference_mode():
+        with torch.no_grad():
+            for start in range(-32_000, rec.shape[0], 32_000):
+                pieces.append(rec[max(0, start): start+96_000])
+                if pieces and len(pieces) % 8 == 0 or start+64_000 > rec.shape[0]:
+                    features = processor(pieces, padding=True, return_tensors="pt", sampling_rate=16_000)
+                    logits = model(features.input_values.to(device)).logits
+                    _, preds = logits.max(-1)
+                    preds = torch.where(preds > 0, preds + note_offset, 0)
+                    notes.append(preds[:, 100: 200].flatten().cpu().numpy())
+                    pieces.clear()
+    notes = np.concatenate(notes)[:int(rec.shape[0]*label_sample_rate/16_000)]
+    mid = notes2mid(notes, label_sample_rate)
+    mid.save(os.path.join(os.path.dirname(path), "trans.mid"))
+
+
+def notes2mid(notes: np.ndarray, label_sample_rate: int = 50) -> mido.MidiFile:
+    mid = mido.MidiFile()
+    track = mido.MidiTrack()
+    mid.tracks.append(track)
+    mid.ticks_per_beat = 480
+    new_tempo = mido.bpm2tempo(120.0)
+
+    track.append(mido.MetaMessage('set_tempo', tempo=new_tempo))
+    track.append(mido.Message('program_change', program=0, time=0))
+
+    cur_t = 0
+    cur_note = 0
+    cur_ticks = 0
+    for i, note in enumerate(notes):
+        if note != cur_note and (notes[max(i-2, 0): i+2] == note).all():
+        # note = np.bincount(notes[max(i-2, 0): i+2]).argmax()
+        # if note != cur_note:
+            ticks = int(mido.second2tick(cur_t, ticks_per_beat=480, tempo=new_tempo))
+            length = ticks - cur_ticks
+            cur_ticks = ticks
+            if cur_note == 0:
+                track.append(mido.Message('note_on', note=note, velocity=100, time=length))
+            else:
+                if note == 0:
+                    track.append(mido.Message('note_off', note=cur_note, velocity=100, time=length))
+                else:
+                    track.append(mido.Message('note_off', note=cur_note, velocity=100, time=max(0, length - 160)))
+                    track.append(mido.Message('note_on', note=note, velocity=100, time=160))
+            cur_note = note
+        cur_t += 1 / label_sample_rate
+    return mid
 
 
 if __name__ == '__main__':

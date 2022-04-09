@@ -12,27 +12,29 @@ from transformers import Wav2Vec2Processor, Wav2Vec2ForAudioFrameClassification
 from melody_data import MelodyDataset
 
 MODEL_NAME = "facebook/wav2vec2-base"
+USE_WEIGHTED_LAYER_SUM = True
 
 DEVICE = torch.device("cuda") if torch.cuda.is_available() else torch.device("cpu")
 ENABLE_PROGRESS = True
 
-MIN_SECS = 1
-MAX_SECS = 4
-SAMPLES_PER_TRACK = 4
+MIN_SECS = 2
+MAX_SECS = 6
+SAMPLES_PER_TRACK = 2
 
 LR = 5e-5
-N_EPOCHS = 200
+N_EPOCHS = 1000
 SAVE_DIR = "save/"
-LOAD = None  # "save/wav2vec2-base_2204100140_e100.pt"
+LOAD = ""#"save/wav2vec2-base_2204100159_e100.pt"
 
-TRAIN_BATCH_SIZE = 8
-VALID_BATCH_SIZE = 8
-VALID_INTERVAL = 5
+TRAIN_BATCH_SIZE = 12
+VALID_BATCH_SIZE = 16
+VALID_INTERVAL = 20
 
 
 def train_melody(
         path: str,
         model_name: str = MODEL_NAME,
+        use_weighted_layer_sum: bool = USE_WEIGHTED_LAYER_SUM,
         device: torch.device = DEVICE,
         enable_progress: bool = ENABLE_PROGRESS,
         lr: float = LR,
@@ -58,12 +60,13 @@ def train_melody(
     valid_dataset = MelodyDataset(
         os.path.join(path, "valid"), processor,
         sample_rate=16_000, label_sample_rate=50,
-        min_secs=4, max_secs=6, samples_per_track=8
+        min_secs=4, max_secs=max_secs, samples_per_track=4
     )
 
     model = Wav2Vec2ForAudioFrameClassification.from_pretrained(
         model_name,
-        num_labels=train_dataset.max_note-train_dataset.min_note+2
+        num_labels=train_dataset.max_note-train_dataset.min_note+2,
+        use_weighted_layer_sum=use_weighted_layer_sum
     ).to(device)
     if load:
         model.load_state_dict(torch.load(load))
