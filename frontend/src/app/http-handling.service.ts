@@ -3,7 +3,7 @@ import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
 import { Observable, throwError } from 'rxjs';
 import { catchError, map, retry } from 'rxjs/operators';
 
-export interface Resp { 
+export interface Resp {
   lyrics: string;
   melody: any;
 }
@@ -14,40 +14,20 @@ export interface Resp {
 
 export class HttpHandlingService {
   mainUrl: string;
-  constructor(private http: HttpClient) {  
+  constructor(private http: HttpClient) {
     this.mainUrl = "http://127.0.0.1:8000/";
-  }
-
-  public simpleMessageTest() {
-    console.log("fileSendingService");
-    let queryParams = new HttpParams();
-    let myMsg = "this is a message from the frontend!";
-    queryParams = queryParams.append("message", myMsg);
-    this.http.get<any>('http://127.0.0.1:8000/simpleMessage/', {params: queryParams, observe: 'body', responseType: 'json'}).subscribe(data => {
-      console.log(data.backendMessage);
-    });
-
   }
 
   async promisePostResponse(url: string, formData: FormData): Promise<Resp>{
     return new Promise((resolve, reject) => {
       try {
-        let responseData: Resp;
-
-        const httpOptions = {
-          headers: new HttpHeaders({
-            lyrics:  'lyrics',
-            melody: 'melody'
-          })
-        };
-      
         let upload$ = this.http.post<Resp>(url, formData).subscribe(
           (data) => {
             console.log(data);
             resolve(data);
           }
         );
-      
+
       } catch (Error) {
           reject("Bad HTTP response");
       }
@@ -64,25 +44,17 @@ export class HttpHandlingService {
     console.log("sendfiles")
     const formData = new FormData();
     formData.append("fileObject", file);
-    const url = "http://127.0.0.1:8000/upload/";
+    const url = this.mainUrl + "upload";
     let respData = await this.promisePostResponse(url, formData);
-    console.log("melody");
-    console.log(respData.melody);
-    return respData;
-    /*
-    let upload$ = this.http.post<Resp>("http://127.0.0.1:8000/upload/", formData).subscribe((data : Resp)=> {
-      respData = {
-        lyrics: data.lyrics,
-        melody: data.melody
-      };
-    });
-    */
-    //let test$ = this.http.get<Resp>("dasdas")
     
+    
+
+
+    return respData;
   }
-  
+
   // http get methods takes in 2 parameters:
-  // 1) endpoint URl from which to fetch 
+  // 1) endpoint URl from which to fetch
   // 2) option object used to configure the request
-  
+
 }

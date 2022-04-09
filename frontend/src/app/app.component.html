@@ -24,11 +24,11 @@
       <app-card-component [buttonDesc]="'Upload mp3'" (receivedFileEvent)="changeUploadedFile($event)">
         <i class="fa-solid fa-file-audio fa-5x"></i>
       </app-card-component>
-    
+
       <div class="row">
         <div class="text-center h5" style="padding-top: 2rem; padding-bottom: 2rem;">
-            <app-simple-button id="sendBtn" 
-            [displayText]="resultFile?'Try Again!':'Transcribe!'" 
+            <app-simple-button id="sendBtn"
+            [displayText]="resultFile?'Try Again!':'Transcribe!'"
             buttonClass="btn btn-primary btn-xl"
             [isEnabled]="file?true:false"
             (click)="sendFilesForTranscribing()">
@@ -36,12 +36,12 @@
         </div>
       </div>
     </div>
-  
 
-    <div *ngIf="sent" class="col-8 justify-content-md-center"> 
+
+    <div *ngIf="sent" class="col-8 justify-content-md-center">
       <div *ngIf="predictedLyrics; else loadingResults">
-        <app-result-table 
-        [file] = "resultFile" 
+        <app-result-table
+        [file] = "resultFile"
         [predictedLyrics]="predictedLyrics">
         </app-result-table>
       </div>
@@ -52,7 +52,7 @@
           </div>
         </app-card-component>
       </ng-template>
-      
+
 
     </div>
 
@@ -61,7 +61,7 @@
 
 
 
-  
+
 
 
 
