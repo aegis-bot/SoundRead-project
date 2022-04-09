@@ -6,8 +6,9 @@ import { Component, Input, OnInit } from '@angular/core';
   styleUrls: ['./result-table.component.css']
 })
 export class ResultTableComponent implements OnInit {
-  @Input() file: File;
+  @Input() predictedMelody: string;
   @Input() predictedLyrics: string = "No lyrics found.";
+  
   constructor() { }
 
   ngOnInit(): void {
@@ -15,9 +16,10 @@ export class ResultTableComponent implements OnInit {
 
   
 
-  play() {
-    if(!!this.file) {
-      
+  playAudio() {
+  
+    if(!!this.predictedMelody) {
+      console.log("play!")
       
     } else {
       console.log("file not in results yet")

@@ -1,3 +1,4 @@
+<a href="#" onClick="MIDIjs.play('http://127.0.0.1:8000/static/temp.mid');" class="playBtn" #playerButton>Play!</a>
 <div class="justify-content-md-center card-giant">
     <div class="row">
         <div class="col-1">
@@ -9,9 +10,10 @@
                     Melody:
                 </div>
             </div>
+        
             <div class="row">
                 <div class="card-image text-center">
-                    <i class="fa-solid fa-circle-play fa-5x" (click)="play()"></i>
+                    <i class="fa-solid fa-circle-play fa-5x play-button" (click)="playerButton.click()"></i>
                 </div>
             </div>
             

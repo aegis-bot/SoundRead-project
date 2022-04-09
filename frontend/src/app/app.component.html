@@ -35,13 +35,11 @@
             </app-simple-button>
         </div>
       </div>
-    </div>
-
-
+    </div>    
     <div *ngIf="sent" class="col-8 justify-content-md-center">
       <div *ngIf="predictedLyrics; else loadingResults">
         <app-result-table
-        [file] = "resultFile"
+        [predictedMelody] = "predictedMelody"
         [predictedLyrics]="predictedLyrics">
         </app-result-table>
       </div>

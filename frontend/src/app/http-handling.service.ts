@@ -5,7 +5,7 @@ import { catchError, map, retry } from 'rxjs/operators';
 
 export interface Resp {
   lyrics: string;
-  melody: any;
+  melody: string;
 }
 
 @Injectable({
@@ -23,6 +23,7 @@ export class HttpHandlingService {
       try {
         let upload$ = this.http.post<Resp>(url, formData).subscribe(
           (data) => {
+            data.melody = this.mainUrl + data.melody
             console.log(data);
             resolve(data);
           }
@@ -46,7 +47,6 @@ export class HttpHandlingService {
     formData.append("fileObject", file);
     const url = this.mainUrl + "upload";
     let respData = await this.promisePostResponse(url, formData);
-
     return respData;
   }
 
