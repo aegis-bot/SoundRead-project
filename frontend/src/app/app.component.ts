@@ -1,6 +1,8 @@
 import { Component } from '@angular/core';
 import { Observable } from 'rxjs';
+import { Url } from 'url';
 import { HttpHandlingService, Resp } from './http-handling.service';
+
 
 @Component({
   selector: 'app-root',
@@ -14,6 +16,7 @@ export class AppComponent {
 
   public resultFile: File;
   public predictedLyrics: string;
+  public predictedMelody: string;
 
   public sent: boolean = false;
 
@@ -44,6 +47,15 @@ export class AppComponent {
     console.log(httpResponse);
 
     this.predictedLyrics = httpResponse.lyrics;
+    this.predictedMelody = httpResponse.melody;
+  }
+
+
+
+  playAudio(){
+    //Player.loadFile('./temp.mid');
+    //Player.play();
+    //MIDIjs.play('');
   }
 }
 
