@@ -1,4 +1,4 @@
-from flask import Flask, request, jsonify, send_from_directory
+from flask import Flask, request, jsonify
 import torch
 import os
 import predictor
@@ -14,7 +14,6 @@ file_type_allowed = ['mp3', 'wav']
 
 def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in file_type_allowed
-
 
 
 @app.route('/upload', methods=['POST'])
@@ -43,18 +42,21 @@ def upload_file():
         results = {}
 
         melody_preds = predictor.predict_song(my_melody_predictor, temp_path, song_id, results, do_svs=False,
-                                                onset_thres=0.4, offset_thres=0.5)
+                                              onset_thres=0.4, offset_thres=0.5)
 
-        playableMidiPath = "static/temp.mid"
-        convert_to_midi(melody_preds, playableMidiPath)                                         
+        static_fol_path = os.path.join(os.getcwd(), "static")
+        if not os.path.exists(static_fol_path):
+            os.makedirs(static_fol_path)
+
+        playable_midi_path = "static/result.mid"
+        convert_to_midi(melody_preds, playable_midi_path)
 
         os.remove(temp_path)
 
         resp = jsonify({"lyrics": lyric_preds,
-                        "melody": playableMidiPath})
+                        "melody": playable_midi_path})
         resp.headers.add('Access-Control-Allow-Origin', '*')
         return resp
-
 
 
 def notes2mid(notes):
@@ -75,7 +77,7 @@ def notes2mid(notes):
         note[2] = int(round(note[2]))
 
         ticks_since_previous_onset = int(mido.second2tick(note[0], ticks_per_beat=480, tempo=new_tempo))
-        ticks_current_note = int(mido.second2tick(note[1]-0.0001, ticks_per_beat=480, tempo=new_tempo))
+        ticks_current_note = int(mido.second2tick(note[1] - 0.0001, ticks_per_beat=480, tempo=new_tempo))
         note_on_length = ticks_since_previous_onset - cur_total_tick
         note_off_length = ticks_current_note - note_on_length - cur_total_tick
 
@@ -85,11 +87,11 @@ def notes2mid(notes):
 
     return mid
 
+
 def convert_to_midi(predicted_result, output_path):
     mid = notes2mid(predicted_result)
     mid.save(output_path)
     return output_path
-
 
 
 if __name__ == "__main__":
