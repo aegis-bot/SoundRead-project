@@ -18,7 +18,7 @@ This program uses a web application frontend (Using Angular) and a backend serve
 
 - Make sure that ffmpeg is downloaded (scroll to the last section for the download process)
 
-- proceed to download the [lyric transcription model]() and [melody transciption model]()
+- Proceed to download the [lyric transcription model](https://drive.google.com/file/d/1cJ0X_UN48ysH8JFXQ4VUUk2a3kWWqTVC/view?usp=sharing) and [melody transciption model](https://drive.google.com/file/d/19KTUjcNpOtUD8XIiVNBlFeGaDDgEzoMH/view?usp=sharing)
 
 - Create a model folder and put it in the backend folder.
 
