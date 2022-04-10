@@ -15,7 +15,7 @@ export interface Resp {
 export class HttpHandlingService {
   mainUrl: string;
   constructor(private http: HttpClient) {
-    this.mainUrl = "http://127.0.0.1:8000/";
+    this.mainUrl = "http://127.0.0.1:5000/";
   }
 
   async promisePostResponse(url: string, formData: FormData): Promise<Resp>{

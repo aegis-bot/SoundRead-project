@@ -3,11 +3,13 @@ import torch
 import os
 import predictor
 from transformers import Speech2TextProcessor, Speech2TextForConditionalGeneration
-from melody.predictor import EffNetPredictor
+from transformers import Wav2Vec2Processor, Wav2Vec2ForAudioFrameClassification
+from flask_cors import CORS
 
-import mido
+from melody.melody_data import transcribe_file
 
 app = Flask(__name__, static_folder='static')
+cors = CORS(app, resources={r"/static/*": {"origins": "*"}})
 
 file_type_allowed = ['mp3', 'wav']
 
@@ -35,76 +37,46 @@ def upload_file():
         file.save(temp_path)
 
         # lyric prediction
-        lyric_preds = predictor.predict_lyrics(temp_path, model, processor, device)
+        lyric_preds = predictor.predict_lyrics(temp_path, lyric_model, lyric_processor, device)
 
         # melody prediction
-        song_id = '1'
-        results = {}
-
-        melody_preds = predictor.predict_song(my_melody_predictor, temp_path, song_id, results, do_svs=False,
-                                              onset_thres=0.4, offset_thres=0.5)
-
         static_fol_path = os.path.join(os.getcwd(), "static")
         if not os.path.exists(static_fol_path):
             os.makedirs(static_fol_path)
 
-        playable_midi_path = "static/result.mid"
-        convert_to_midi(melody_preds, playable_midi_path)
+        relative_midi_path = "static/result.mid"
+        absolute_midi_path = os.path.join(os.getcwd() , relative_midi_path)
+        transcribe_file(melody_processor, melody_model, temp_path, save_path=absolute_midi_path)
 
         os.remove(temp_path)
 
         resp = jsonify({"lyrics": lyric_preds,
-                        "melody": playable_midi_path})
+                        "melody": relative_midi_path})
         resp.headers.add('Access-Control-Allow-Origin', '*')
         return resp
 
 
-def notes2mid(notes):
-    mid = mido.MidiFile()
-    track = mido.MidiTrack()
-    mid.tracks.append(track)
-    mid.ticks_per_beat = 480
-    new_tempo = mido.bpm2tempo(120.0)
-
-    track.append(mido.MetaMessage('set_tempo', tempo=new_tempo))
-    track.append(mido.Message('program_change', program=0, time=0))
-
-    cur_total_tick = 0
-
-    for note in notes:
-        if note[2] == 0:
-            continue
-        note[2] = int(round(note[2]))
-
-        ticks_since_previous_onset = int(mido.second2tick(note[0], ticks_per_beat=480, tempo=new_tempo))
-        ticks_current_note = int(mido.second2tick(note[1] - 0.0001, ticks_per_beat=480, tempo=new_tempo))
-        note_on_length = ticks_since_previous_onset - cur_total_tick
-        note_off_length = ticks_current_note - note_on_length - cur_total_tick
-
-        track.append(mido.Message('note_on', note=note[2], velocity=100, time=note_on_length))
-        track.append(mido.Message('note_off', note=note[2], velocity=100, time=note_off_length))
-        cur_total_tick = cur_total_tick + note_on_length + note_off_length
-
-    return mid
-
-
-def convert_to_midi(predicted_result, output_path):
-    mid = notes2mid(predicted_result)
-    mid.save(output_path)
-    return output_path
-
-
 if __name__ == "__main__":
+    device = torch.device("cuda") if torch.cuda.is_available() else torch.device("cpu")
+
     # load lyric
     pretrained = "facebook/s2t-medium-librispeech-asr"
     lyric_model_path = "model/lyric_model.pt"
-    device = torch.device("cuda") if torch.cuda.is_available() else torch.device("cpu")
-    processor = Speech2TextProcessor.from_pretrained(pretrained, do_upper_case=True)
-    model = Speech2TextForConditionalGeneration.from_pretrained(pretrained).to(device)
-    model.load_state_dict(torch.load(lyric_model_path, map_location=torch.device('cpu')))
+    lyric_processor = Speech2TextProcessor.from_pretrained(pretrained, do_upper_case=True)
+    lyric_model = Speech2TextForConditionalGeneration.from_pretrained(pretrained).to(device)
+    lyric_model.load_state_dict(torch.load(lyric_model_path, map_location=torch.device('cpu')))
 
     # load melody
-    melody_model_path = "model/melody_model"
-    my_melody_predictor = EffNetPredictor(device=device, model_path=melody_model_path)
+    min_note = 29
+    max_note = 83
+    melody_model_name = "facebook/wav2vec2-base"
+    melody_processor = Wav2Vec2Processor.from_pretrained(melody_model_name)
+    melody_model = Wav2Vec2ForAudioFrameClassification.from_pretrained(
+        melody_model_name,
+        use_weighted_layer_sum=True,
+        num_labels=max_note - min_note + 2
+    ).to(device)
+    melody_model_path = "model/melody_model.pt"
+    melody_model.load_state_dict(torch.load(melody_model_path, map_location=torch.device('cpu')))
 
     app.run(debug=True)
