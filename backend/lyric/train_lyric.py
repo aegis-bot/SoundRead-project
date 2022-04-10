@@ -21,7 +21,7 @@ ENABLE_PROGRESS = True
 MAX_SECS = 12
 
 LR = 5e-5
-N_EPOCHS = 50
+N_EPOCHS = 20
 SAVE_DIR = "save/"
 LOAD = None  # "save/wav2vec2-base-960h_2203140107_106.pt"
 
@@ -153,7 +153,7 @@ def train_lyric(
 
 
 parser = argparse.ArgumentParser()
-parser.add_argument("-p", "--path", type=str, default="./data/DSing/DSing_train1")
+parser.add_argument("-p", "--path", type=str, default="./data/DSing/DSing_train_all")
 
 if __name__ == '__main__':
     args = parser.parse_args()
