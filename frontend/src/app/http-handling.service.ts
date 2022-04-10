@@ -1,7 +1,12 @@
 import { Injectable } from '@angular/core';
-import { HttpClient, HttpParams } from '@angular/common/http';
+import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
 import { Observable, throwError } from 'rxjs';
-import { catchError, retry } from 'rxjs/operators';
+import { catchError, map, retry } from 'rxjs/operators';
+
+export interface Resp {
+  lyrics: string;
+  melody: string;
+}
 
 @Injectable({
   providedIn: 'root'
@@ -9,34 +14,44 @@ import { catchError, retry } from 'rxjs/operators';
 
 export class HttpHandlingService {
   mainUrl: string;
-  constructor(private http: HttpClient) {  
+  constructor(private http: HttpClient) {
     this.mainUrl = "http://127.0.0.1:8000/";
   }
 
-  public simpleMessageTest() {
-    console.log("fileSendingService");
-    let queryParams = new HttpParams();
-    let myMsg = "this is a message from the frontend!";
-    queryParams = queryParams.append("message", myMsg);
-    this.http.get<any>('http://127.0.0.1:8000/simpleMessage/', {params: queryParams, observe: 'body', responseType: 'json'}).subscribe(data => {
-      console.log(data.backendMessage);
-    });
+  async promisePostResponse(url: string, formData: FormData): Promise<Resp>{
+    return new Promise((resolve, reject) => {
+      try {
+        let upload$ = this.http.post<Resp>(url, formData).subscribe(
+          (data) => {
+            data.melody = this.mainUrl + data.melody
+            console.log(data);
+            resolve(data);
+          }
+        );
 
+      } catch (Error) {
+          reject("Bad HTTP response");
+      }
+    }
+    );
   }
 
-  
+  async receivePostResponse(url: string, formData: FormData, respData: Resp) : Promise<Resp> {
+    respData = await this.promisePostResponse(url, formData);
+    return respData;
+  }
 
-  sendFiles(file: File) {
+  async sendFiles(file: File): Promise<Resp> {
+    console.log("sendfiles")
     const formData = new FormData();
     formData.append("fileObject", file);
-    const upload$ = this.http.post(this.mainUrl + "upload/", formData);
-    upload$.subscribe(data=> {
-      console.log(data);
-    });
+    const url = this.mainUrl + "upload";
+    let respData = await this.promisePostResponse(url, formData);
+    return respData;
   }
-  
+
   // http get methods takes in 2 parameters:
-  // 1) endpoint URl from which to fetch 
+  // 1) endpoint URl from which to fetch
   // 2) option object used to configure the request
-  
+
 }

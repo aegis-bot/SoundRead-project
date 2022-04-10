@@ -2,7 +2,7 @@
 SoundRead is a melody and lyrics transcription web service that takes advantage of the modern ML to churn out accurate lyrics.
 This program uses a web application frontend (Using Angular) and a backend server using FastAPI. To get started, you need to run both the frontend and the backend.
 ## Frontend
-- Make sure you have angular installed. To install in the Terminal, run ``npm install - g @angular/cli``.
+- Make sure you have angular installed. To install in the Terminal, navigate to frontend folder and run ``npm install - g @angular/cli``.
 
 ## Run Angular Frontend
 - Navigate to frontend folder.
@@ -14,14 +14,32 @@ This program uses a web application frontend (Using Angular) and a backend serve
 
 - Activate your virtual environment.
 
-- Navigate to the `backend` folder
-
 - In virtual environment `(venv)`, install dependencies with: `pip install -r requirements.txt`
 
+- Make sure that ffmpeg is downloaded (scroll to the last section for the download process)
+
+- proceed to download the [lyric transcription model]() and [melody transciption model]()
+
+- Create a model folder and put it in the backend folder.
+
+- Place the models downloaded into the path 'backend/model'
+
 ## Run python backend server
+- Navigate to the `backend` folder
 
-- In virtual environment `(venv)`, to run python backend server: `uvicorn main:app --reload`
+- In virtual environment `(venv)`, to run python backend server: `python3 main.py`
 
-Server runs by default at http://localhost:8000
+Server runs by default at http://127.0.0.1:5000/
 
-Documentation for api will also be available at http://localhost:8000/docs#/
+## Download ffmpeg
+If you are using Anaconda, install *ffmpeg* by calling
+```
+conda install -c conda-forge ffmpeg
+```
+
+If you are not using Anaconda:
+
+* Linux (apt-get): `apt-get install ffmpeg`
+* Linux (yum): `yum install ffmpeg`
+* Mac: `brew install ffmpeg`
+* Windows: download ffmpeg binaries from this [website](https://www.gyan.dev/ffmpeg/builds/)
