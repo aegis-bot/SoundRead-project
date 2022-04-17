@@ -1,5 +1,4 @@
 import { Component, Input, OnInit } from '@angular/core';
-import { HttpHandlingService, Resp } from '../http-handling.service';
 
 
 @Component({
@@ -12,7 +11,7 @@ export class ResultTableComponent implements OnInit {
   @Input() predictedMelody: string;
   @Input() predictedLyrics: string = "No lyrics found.";
   
-  constructor(private dataService: HttpHandlingService) { }
+  constructor() { }
 
   ngOnInit(): void {
   }
