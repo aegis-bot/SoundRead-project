@@ -60,7 +60,8 @@ def upload_file():
         absolute_midi_path = os.path.join(os.getcwd(), relative_midi_path)
         transcribe_file(melody_processor, melody_model, temp_path, save_path=absolute_midi_path)
 
-        os.remove(temp_path)
+        if os.path.exists(temp_path):
+            os.remove(temp_path)
 
         resp = jsonify({"lyrics": lyric_preds,
                         "melody": relative_midi_path})
