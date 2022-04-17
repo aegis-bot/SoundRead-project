@@ -55,7 +55,7 @@ export class AppComponent {
 
 
   playAudio(){
-    //Player.loadFile('./temp.mid');
+    //Player.loadFile('./result.mid');
     //Player.play();
     //MIDIjs.play('');
   }
