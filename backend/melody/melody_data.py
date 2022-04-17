@@ -127,7 +127,8 @@ def transcribe_file(
         path: str,
         note_offset: int = 28,
         label_sample_rate: int = 50,
-        window_size: int = 4
+        window_size: int = 4,
+        save_path = "static/result.mid"
 ):
     device = torch.device("cuda") if torch.cuda.is_available() else torch.device("cpu")
     model = model.to(device)
@@ -148,7 +149,7 @@ def transcribe_file(
                     pieces.clear()
     notes = np.concatenate(notes)[:int(rec.shape[0]*label_sample_rate/16_000)]
     mid = notes2mid(notes, label_sample_rate)
-    mid.save(os.path.join(os.path.dirname(path), "trans.mid"))
+    mid.save(os.path.join(os.path.dirname(path), save_path))
 
 
 def notes2mid(notes: np.ndarray, label_sample_rate: int = 50) -> mido.MidiFile:
