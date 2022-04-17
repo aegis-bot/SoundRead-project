@@ -126,7 +126,8 @@ def transcribe_file(
         model: Wav2Vec2ForAudioFrameClassification,
         path: str,
         note_offset: int = 28,
-        label_sample_rate: int = 50
+        label_sample_rate: int = 50,
+        window_size: int = 4
 ):
     device = torch.device("cuda") if torch.cuda.is_available() else torch.device("cpu")
     model = model.to(device)
@@ -136,14 +137,14 @@ def transcribe_file(
     notes = []
     with torch.inference_mode():
         with torch.no_grad():
-            for start in range(-64_000, rec.shape[0], 64_000):
-                pieces.append(rec[max(0, start): start+192_000])
-                if pieces and len(pieces) % 8 == 0 or start+128_000 > rec.shape[0]:
+            for start in range(-16_000*window_size, rec.shape[0], 16_000*window_size):
+                pieces.append(rec[max(0, start): start+16_000*window_size*3])
+                if pieces and len(pieces) % 8 == 0 or start+16_000*window_size*2 > rec.shape[0]:
                     features = processor(pieces, padding=True, return_tensors="pt", sampling_rate=16_000)
                     logits = model(features.input_values.to(device)).logits
                     _, preds = logits.max(-1)
                     preds = torch.where(preds > 0, preds + note_offset, 0)
-                    notes.append(preds[:, 200: 400].flatten().cpu().numpy())
+                    notes.append(preds[:, 50*window_size: 50*window_size*2].flatten().cpu().numpy())
                     pieces.clear()
     notes = np.concatenate(notes)[:int(rec.shape[0]*label_sample_rate/16_000)]
     mid = notes2mid(notes, label_sample_rate)
