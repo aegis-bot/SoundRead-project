@@ -2,6 +2,8 @@ from flask import Flask, request, jsonify
 import torch
 import os
 import predictor
+import glob
+import re
 from transformers import Speech2TextProcessor, Speech2TextForConditionalGeneration
 from transformers import Wav2Vec2Processor, Wav2Vec2ForAudioFrameClassification
 from flask_cors import CORS
@@ -44,8 +46,18 @@ def upload_file():
         if not os.path.exists(static_fol_path):
             os.makedirs(static_fol_path)
 
-        relative_midi_path = "static/result.mid"
-        absolute_midi_path = os.path.join(os.getcwd() , relative_midi_path)
+        list_of_files = os.listdir(static_fol_path)
+        num_of_files = len(list_of_files)
+        if num_of_files == 0:
+            filenum = 0
+        else:
+            file_type = r'/*mid'
+            files_name = glob.glob(static_fol_path + file_type)
+            files_num = [extract_num(file) for file in files_name]
+            filenum = max(files_num) + 1
+
+        relative_midi_path = "static/result" + str(filenum) + ".mid"
+        absolute_midi_path = os.path.join(os.getcwd(), relative_midi_path)
         transcribe_file(melody_processor, melody_model, temp_path, save_path=absolute_midi_path)
 
         os.remove(temp_path)
@@ -54,6 +66,10 @@ def upload_file():
                         "melody": relative_midi_path})
         resp.headers.add('Access-Control-Allow-Origin', '*')
         return resp
+
+#get the number from the filename
+def extract_num(abs_path):
+    return int(re.findall(r'\d+', os.path.basename(abs_path))[0])
 
 
 if __name__ == "__main__":
