@@ -37,6 +37,17 @@ If you are using Anaconda, install *ffmpeg* by calling
 conda install -c conda-forge ffmpeg
 ```
 
+## To get prediction for lyric and melody
+```shell
+cd backend/lyric; python predict_lyric.py --input FILE_PATH
+cd backend/melody; python predict_melody.py --input FILE_PATH
+```
+The lyric model and melody model PyTorch weights can be downloaded at
+```html
+https://drive.google.com/file/d/1E-aDN4qNF5Y-ngqjIuHcui2jHRwGLKPj
+https://drive.google.com/file/d/19KTUjcNpOtUD8XIiVNBlFeGaDDgEzoMH
+```
+
 If you are not using Anaconda:
 
 * Linux (apt-get): `apt-get install ffmpeg`
