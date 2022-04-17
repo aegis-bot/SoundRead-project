@@ -4,24 +4,22 @@ import torch
 import torchaudio
 from transformers import Speech2TextProcessor, Speech2TextForConditionalGeneration
 
-# parser = argparse.ArgumentParser()
-# parser.add_argument("--input", required=True, help="input audio file path")
+parser = argparse.ArgumentParser()
+parser.add_argument("--input", required=True, help="input audio file path")
 
-# download lyric_model.pt from https://drive.google.com/file/d/1cJ0X_UN48ysH8JFXQ4VUUk2a3kWWqTVC/view?usp=sharing
 if __name__ == '__main__':
-    # args = parser.parse_args()
+    args = parser.parse_args()
 
     # load model
     pretrained = "facebook/s2t-medium-librispeech-asr"
-    save = "../model/save/s2t-medium-librispeech-asr_2203231933_0.37.pt"
+    save = "lyric_model.pt"
     device = torch.device("cuda") if torch.cuda.is_available() else torch.device("cpu")
     processor = Speech2TextProcessor.from_pretrained(pretrained, do_upper_case=True)
     model = Speech2TextForConditionalGeneration.from_pretrained(pretrained).to(device)
     model.load_state_dict(torch.load(save))
 
     # predict
-    rec, sample_rate = torchaudio.load(
-        "../model/data/DSing/DSing_train_all/audio/F833021197-101935856_790417-832995897_1690995779-GB-F-059.wav")
+    rec, sample_rate = torchaudio.load(args.input)
     if sample_rate != 16_000:
         torchaudio.functional.resample(rec, sample_rate, 16_000)
     features = processor(
