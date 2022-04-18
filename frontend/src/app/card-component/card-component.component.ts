@@ -10,6 +10,10 @@ import { HttpHandlingService } from '../http-handling.service';
   templateUrl: './card-component.component.html',
   styleUrls: ['./card-component.component.css']
 })
+
+/**
+ * For displaying elements and objects. Stores a file,and then passes it back to the parent
+ */
 export class CardComponentComponent implements OnInit {
   //no parameters unless got multiple uploads
   @Input() header:string;

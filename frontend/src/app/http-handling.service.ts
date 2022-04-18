@@ -12,6 +12,9 @@ export interface Resp {
   providedIn: 'root'
 })
 
+/**
+ * Handles request and response with a given server
+ */
 export class HttpHandlingService {
   mainUrl: string;
   constructor(private http: HttpClient) {

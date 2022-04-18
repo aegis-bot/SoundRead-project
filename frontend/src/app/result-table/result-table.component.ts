@@ -7,6 +7,10 @@ import { Component, Input, OnInit } from '@angular/core';
   styleUrls: ['./result-table.component.css']
 })
 
+/**
+ * Component to display predictions. able to play MIDI
+ */
+
 export class ResultTableComponent implements OnInit {
   @Input() predictedMelody: string;
   @Input() predictedLyrics: string = "No lyrics found.";
