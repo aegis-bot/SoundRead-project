@@ -17,6 +17,7 @@
         <div>
           <div *ngIf="buttonDesc" class="text-center">
             <app-simple-button id="uploadButton"
+            buttonClass="btn btn-primary btn-lg"
               [displayText]="buttonDesc" (click)="fileUpload.click()">
             </app-simple-button>
           </div>
