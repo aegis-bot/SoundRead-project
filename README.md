@@ -18,16 +18,12 @@ This program uses a web application frontend (Using Angular) and a backend serve
 
 - Make sure that ffmpeg is downloaded (scroll to the last section for the download process)
 
-- Proceed to download the [lyric transcription model](https://drive.google.com/file/d/1cJ0X_UN48ysH8JFXQ4VUUk2a3kWWqTVC/view?usp=sharing) and [melody transciption model](https://drive.google.com/file/d/19KTUjcNpOtUD8XIiVNBlFeGaDDgEzoMH/view?usp=sharing)
-
-- Create a model folder and put it in the backend folder.
-
-- Place the models downloaded into the path 'backend/model'
+- Proceed to download the [lyric transcription model](https://drive.google.com/file/d/1E-aDN4qNF5Y-ngqjIuHcui2jHRwGLKPj) and [melody transciption model](https://drive.google.com/file/d/19KTUjcNpOtUD8XIiVNBlFeGaDDgEzoMH)
 
 ## Run python backend server
 - Navigate to the `backend` folder
 
-- In virtual environment `(venv)`, to run python backend server: `python3 main.py`
+- In virtual environment `(venv)`, to run python backend server: `python3 main.py --lyric_model LYRIC_MODEL_PATH --melody_model MELODY_MODEL_PATH`
 
 Server runs by default at http://127.0.0.1:5000/
 
