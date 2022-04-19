@@ -32,6 +32,13 @@ If you are using Anaconda, install *ffmpeg* by calling
 ```
 conda install -c conda-forge ffmpeg
 ```
+If you are not using Anaconda:
+
+* Linux (apt-get): `apt-get install ffmpeg`
+* Linux (yum): `yum install ffmpeg`
+* Mac: `brew install ffmpeg`
+* Windows: download ffmpeg binaries from this [website](https://www.gyan.dev/ffmpeg/builds/)
+
 
 ## To get prediction for lyric and melody
 ```shell
@@ -43,10 +50,3 @@ The lyric model and melody model PyTorch weights can be downloaded at
 https://drive.google.com/file/d/1E-aDN4qNF5Y-ngqjIuHcui2jHRwGLKPj
 https://drive.google.com/file/d/19KTUjcNpOtUD8XIiVNBlFeGaDDgEzoMH
 ```
-
-If you are not using Anaconda:
-
-* Linux (apt-get): `apt-get install ffmpeg`
-* Linux (yum): `yum install ffmpeg`
-* Mac: `brew install ffmpeg`
-* Windows: download ffmpeg binaries from this [website](https://www.gyan.dev/ffmpeg/builds/)
